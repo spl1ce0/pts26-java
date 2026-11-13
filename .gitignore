@@ -1,2 +1,7 @@
 target
 .Makefile.swp
+
+# IDE and OS files
+.idea/
+*.iml
+.DS_Store
