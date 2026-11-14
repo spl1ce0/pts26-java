@@ -9,59 +9,43 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-final class TownsFake implements Towns {
-    int maxHouses = 0;
-    int step2Calls = 0;
-    int step3Calls = 0;
-
-    @Override
-    public Variant<Integer, RequestError> buyHouses(final PlayerColor player, final List<String> townNames, final int maxMoney) {
-        return Variant.ofA(0);
-    }
-
-    @Override
-    public int getNumberOfHouses(final PlayerColor player) {
-        return 0;
-    }
+final class FakeTowns implements Towns {
+    int maximumNumberOfHouses = 0;
+    int step2NotificationCount = 0;
+    int step3NotificationCount = 0;
 
     @Override
     public int getMaxNumberOfHouses() {
-        return maxHouses;
+        return maximumNumberOfHouses;
     }
 
     @Override
     public void startStep2() {
-        step2Calls++;
+        step2NotificationCount++;
     }
 
     @Override
     public void startStep3() {
-        step3Calls++;
+        step3NotificationCount++;
     }
 }
 
-final class PowerPlantMarketFake implements PowerPlantMarket {
-    boolean step3Start = false;
-    int step3Calls = 0;
-    int prepareNextTurnCalls = 0;
+final class FakePowerPlantMarket implements PowerPlantMarket {
+    boolean step3CardDrawn = false;
+    int step3NotificationCount = 0;
 
     @Override
     public boolean isStep3Start() {
-        return step3Start;
+        return step3CardDrawn;
     }
 
     @Override
     public void startStep3() {
-        step3Calls++;
-    }
-
-    @Override
-    public void prepareNextTurn() {
-        prepareNextTurnCalls++;
+        step3NotificationCount++;
     }
 }
 
-final class ResourcePoolStub implements InterfaceResourcePoolResourceMarket {
+final class StubResourcePoolForMarket implements InterfaceResourcePoolResourceMarket {
     @Override
     public boolean canTakeResourcesFromStorageSpace(final List<Resource> resources) {
         return false;
@@ -84,145 +68,154 @@ final class ResourcePoolStub implements InterfaceResourcePoolResourceMarket {
 
 public class CheckAndBumpStepTest {
 
-    private TownsFake towns;
+    private FakeTowns fakeTowns;
     private ResourceMarket resourceMarket;
-    private PowerPlantMarketFake powerPlantMarket;
-    private CheckAndBumpStepClass checker;
+    private FakePowerPlantMarket fakePowerPlantMarket;
+    private CheckAndBumpStepClass stepChecker;
 
     private static ResourceMarket createResourceMarket() {
-        Map<Integer, Map<Resource, Integer>> pattern = Map.of(
+        Map<Integer, Map<Resource, Integer>> refillPattern = Map.of(
                 1, Map.of(Resource.COAL, 1, Resource.OIL, 1, Resource.GARBAGE, 1, Resource.URANIUM, 1),
                 2, Map.of(Resource.COAL, 1, Resource.OIL, 1, Resource.GARBAGE, 1, Resource.URANIUM, 1),
                 3, Map.of(Resource.COAL, 1, Resource.OIL, 1, Resource.GARBAGE, 1, Resource.URANIUM, 1)
         );
-        return new ResourceMarket(new ResourcePoolStub(), List.of(), pattern);
+        return new ResourceMarket(new StubResourcePoolForMarket(), List.of(), refillPattern);
     }
 
     @Before
     public void setUp() {
-        towns = new TownsFake();
+        fakeTowns = new FakeTowns();
         resourceMarket = createResourceMarket();
-        powerPlantMarket = new PowerPlantMarketFake();
-        checker = new CheckAndBumpStepClass(towns, resourceMarket, powerPlantMarket);
+        fakePowerPlantMarket = new FakePowerPlantMarket();
+        stepChecker = new CheckAndBumpStepClass(fakeTowns, resourceMarket, fakePowerPlantMarket);
     }
 
     @Test
     public void testInitialStepIsOne() {
-        assertEquals(1, checker.getStep());
-        assertEquals(0, towns.step2Calls);
+        assertEquals(1, stepChecker.getStep());
+        assertEquals(0, fakeTowns.step2NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep2BelowThresholdDoesNotTrigger() {
-        towns.maxHouses = 6;
-        checker.checkAndBumpToStep2();
+        fakeTowns.maximumNumberOfHouses = 6;
+        stepChecker.checkAndBumpToStep2();
 
-        assertEquals(1, checker.getStep());
-        assertEquals(0, towns.step2Calls);
+        assertEquals(1, stepChecker.getStep());
+        assertEquals(0, fakeTowns.step2NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep2AtThresholdTriggers() {
-        towns.maxHouses = 7;
-        checker.checkAndBumpToStep2();
+        fakeTowns.maximumNumberOfHouses = 7;
+        stepChecker.checkAndBumpToStep2();
 
-        assertEquals(2, checker.getStep());
-        assertEquals(1, towns.step2Calls);
-        assertEquals(0, towns.step3Calls);
-        assertEquals(0, powerPlantMarket.step3Calls);
+        assertEquals(2, stepChecker.getStep());
+        assertEquals(1, fakeTowns.step2NotificationCount);
+        assertEquals(0, fakeTowns.step3NotificationCount);
+        assertEquals(0, fakePowerPlantMarket.step3NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep2AboveThresholdTriggers() {
-        towns.maxHouses = 10;
-        checker.checkAndBumpToStep2();
+        fakeTowns.maximumNumberOfHouses = 10;
+        stepChecker.checkAndBumpToStep2();
 
-        assertEquals(2, checker.getStep());
-        assertEquals(1, towns.step2Calls);
+        assertEquals(2, stepChecker.getStep());
+        assertEquals(1, fakeTowns.step2NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep2WhenAlreadyAtStep2DoesNotTriggerAgain() {
-        towns.maxHouses = 7;
-        checker.checkAndBumpToStep2();
-        assertEquals(2, checker.getStep());
+        fakeTowns.maximumNumberOfHouses = 7;
+        stepChecker.checkAndBumpToStep2();
+        assertEquals(2, stepChecker.getStep());
 
-        towns.maxHouses = 8;
-        checker.checkAndBumpToStep2();
+        fakeTowns.maximumNumberOfHouses = 8;
+        stepChecker.checkAndBumpToStep2();
 
-        assertEquals(2, checker.getStep());
-        assertEquals(1, towns.step2Calls);
+        assertEquals(2, stepChecker.getStep());
+        assertEquals(1, fakeTowns.step2NotificationCount);
     }
 
     @Test
-    public void testCheckAndBumpToStep3WhenNotDrawnDoesNotTrigger() {
-        powerPlantMarket.step3Start = false;
-        checker.checkAndBumpToStep3();
+    public void testCheckAndBumpToStep3WhenCardNotDrawnDoesNotTrigger() {
+        fakePowerPlantMarket.step3CardDrawn = false;
+        stepChecker.checkAndBumpToStep3();
 
-        assertEquals(1, checker.getStep());
-        assertEquals(0, powerPlantMarket.step3Calls);
-        assertEquals(0, towns.step3Calls);
+        assertEquals(1, stepChecker.getStep());
+        assertEquals(0, fakePowerPlantMarket.step3NotificationCount);
+        assertEquals(0, fakeTowns.step3NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep3FromStep2Triggers() {
-        towns.maxHouses = 7;
-        checker.checkAndBumpToStep2();
-        assertEquals(2, checker.getStep());
+        fakeTowns.maximumNumberOfHouses = 7;
+        stepChecker.checkAndBumpToStep2();
+        assertEquals(2, stepChecker.getStep());
 
-        powerPlantMarket.step3Start = true;
-        checker.checkAndBumpToStep3();
+        fakePowerPlantMarket.step3CardDrawn = true;
+        stepChecker.checkAndBumpToStep3();
 
-        assertEquals(3, checker.getStep());
-        assertEquals(1, towns.step2Calls);
-        assertEquals(1, towns.step3Calls);
-        assertEquals(1, powerPlantMarket.step3Calls);
+        assertEquals(3, stepChecker.getStep());
+        assertEquals(1, fakeTowns.step2NotificationCount);
+        assertEquals(1, fakeTowns.step3NotificationCount);
+        assertEquals(1, fakePowerPlantMarket.step3NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep3DirectlyFromStep1ExecutesStep2ThenStep3() {
-        // According to official rules: if Step 3 starts before Step 2, first apply Step 2 changes, then Step 3.
-        powerPlantMarket.step3Start = true;
-        checker.checkAndBumpToStep3();
+        fakePowerPlantMarket.step3CardDrawn = true;
+        stepChecker.checkAndBumpToStep3();
 
-        assertEquals(3, checker.getStep());
-        assertEquals(1, towns.step2Calls);
-        assertEquals(1, towns.step3Calls);
-        assertEquals(1, powerPlantMarket.step3Calls);
+        assertEquals(3, stepChecker.getStep());
+        assertEquals(1, fakeTowns.step2NotificationCount);
+        assertEquals(1, fakeTowns.step3NotificationCount);
+        assertEquals(1, fakePowerPlantMarket.step3NotificationCount);
     }
 
     @Test
     public void testCheckAndBumpToStep3WhenAlreadyAtStep3DoesNotTriggerAgain() {
-        powerPlantMarket.step3Start = true;
-        checker.checkAndBumpToStep3();
-        assertEquals(3, checker.getStep());
+        fakePowerPlantMarket.step3CardDrawn = true;
+        stepChecker.checkAndBumpToStep3();
+        assertEquals(3, stepChecker.getStep());
 
-        checker.checkAndBumpToStep3();
-        assertEquals(3, checker.getStep());
-        assertEquals(1, powerPlantMarket.step3Calls);
-        assertEquals(1, towns.step3Calls);
+        stepChecker.checkAndBumpToStep3();
+        assertEquals(3, stepChecker.getStep());
+        assertEquals(1, fakePowerPlantMarket.step3NotificationCount);
+        assertEquals(1, fakeTowns.step3NotificationCount);
     }
 
     @Test
     public void testCustomThresholdForSixPlayers() {
-        CheckAndBumpStepClass sixPlayerChecker = new CheckAndBumpStepClass(
-                towns, createResourceMarket(), powerPlantMarket, 6);
-        towns.maxHouses = 5;
-        sixPlayerChecker.checkAndBumpToStep2();
-        assertEquals(1, sixPlayerChecker.getStep());
+        CheckAndBumpStepClass sixPlayerStepChecker = new CheckAndBumpStepClass(
+                fakeTowns, createResourceMarket(), fakePowerPlantMarket, 6);
+        fakeTowns.maximumNumberOfHouses = 5;
+        sixPlayerStepChecker.checkAndBumpToStep2();
+        assertEquals(1, sixPlayerStepChecker.getStep());
 
-        towns.maxHouses = 6;
-        sixPlayerChecker.checkAndBumpToStep2();
-        assertEquals(2, sixPlayerChecker.getStep());
+        fakeTowns.maximumNumberOfHouses = 6;
+        sixPlayerStepChecker.checkAndBumpToStep2();
+        assertEquals(2, sixPlayerStepChecker.getStep());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidThresholdThrows() {
-        new CheckAndBumpStepClass(towns, resourceMarket, powerPlantMarket, 0);
+        new CheckAndBumpStepClass(fakeTowns, resourceMarket, fakePowerPlantMarket, 0);
     }
 
     @Test(expected = NullPointerException.class)
     public void testNullTownsThrows() {
-        new CheckAndBumpStepClass(null, resourceMarket, powerPlantMarket);
+        new CheckAndBumpStepClass(null, resourceMarket, fakePowerPlantMarket);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testNullResourceMarketThrows() {
+        new CheckAndBumpStepClass(fakeTowns, null, fakePowerPlantMarket);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testNullPowerPlantMarketThrows() {
+        new CheckAndBumpStepClass(fakeTowns, resourceMarket, null);
     }
 }

@@ -1,70 +1,68 @@
 package sk.uniba.fmph.dcs.power_grid;
 
 import java.util.Objects;
-import java.util.Optional;
 
-public final class Variant<A, B> {
+public final class Variant<FirstType, SecondType> {
 
-    private final A a;
-    private final B b;
+    private final FirstType firstValue;
+    private final SecondType secondValue;
 
-    private Variant(final A a, final B b) {
-        this.a = a;
-        this.b = b;
+    private Variant(final FirstType firstValue, final SecondType secondValue) {
+        this.firstValue = firstValue;
+        this.secondValue = secondValue;
     }
 
-    public static <A, B> Variant<A, B> ofA(final A a) {
-        Objects.requireNonNull(a, "Value for A cannot be null");
-        return new Variant<>(a, null);
+    public static <FirstType, SecondType> Variant<FirstType, SecondType> ofA(final FirstType firstValue) {
+        Objects.requireNonNull(firstValue, "First value cannot be null");
+        return new Variant<>(firstValue, null);
     }
 
-    public static <A, B> Variant<A, B> ofB(final B b) {
-        Objects.requireNonNull(b, "Value for B cannot be null");
-        return new Variant<>(null, b);
+    public static <FirstType, SecondType> Variant<FirstType, SecondType> ofB(final SecondType secondValue) {
+        Objects.requireNonNull(secondValue, "Second value cannot be null");
+        return new Variant<>(null, secondValue);
     }
 
     public boolean isA() {
-        return a != null;
+        return firstValue != null;
     }
 
     public boolean isB() {
-        return b != null;
+        return secondValue != null;
     }
 
-    public A getA() {
-        return a;
+    public FirstType getA() {
+        if (!isA()) {
+            throw new IllegalStateException("Cannot retrieve first value because this Variant contains second value");
+        }
+        return firstValue;
     }
 
-    public B getB() {
-        return b;
-    }
-
-    public Optional<A> optA() {
-        return Optional.ofNullable(a);
-    }
-
-    public Optional<B> optB() {
-        return Optional.ofNullable(b);
+    public SecondType getB() {
+        if (!isB()) {
+            throw new IllegalStateException("Cannot retrieve second value because this Variant contains first value");
+        }
+        return secondValue;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object otherObject) {
+        if (this == otherObject) {
             return true;
         }
-        if (!(obj instanceof Variant<?, ?> other)) {
+        if (!(otherObject instanceof Variant<?, ?> otherVariant)) {
             return false;
         }
-        return Objects.equals(a, other.a) && Objects.equals(b, other.b);
+        return Objects.equals(firstValue, otherVariant.firstValue)
+                && Objects.equals(secondValue, otherVariant.secondValue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(a, b);
+        return Objects.hash(firstValue, secondValue);
     }
 
     @Override
     public String toString() {
-        return isA() ? "Variant[A=" + a + "]" : "Variant[B=" + b + "]";
+        return isA() ? "Variant[A=" + firstValue + "]" : "Variant[B=" + secondValue + "]";
     }
 }

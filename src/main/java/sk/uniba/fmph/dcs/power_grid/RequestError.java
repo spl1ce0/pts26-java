@@ -7,26 +7,22 @@ public final class RequestError {
     private final String description;
 
     public RequestError(final String description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(description, "Description cannot be null");
     }
 
     public String getDescription() {
         return description;
     }
 
-    public String description() {
-        return description;
-    }
-
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object otherObject) {
+        if (this == otherObject) {
             return true;
         }
-        if (!(obj instanceof RequestError other)) {
+        if (!(otherObject instanceof RequestError otherError)) {
             return false;
         }
-        return Objects.equals(description, other.description);
+        return Objects.equals(description, otherError.description);
     }
 
     @Override
@@ -36,6 +32,6 @@ public final class RequestError {
 
     @Override
     public String toString() {
-        return "RequestError{" + "description='" + description + '\'' + '}';
+        return "RequestError{description='" + description + "'}";
     }
 }

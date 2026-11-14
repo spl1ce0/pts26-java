@@ -5,13 +5,15 @@ import java.util.Optional;
 
 public interface PlayerPowerPlants {
 
-    PowerPlantNumber bestPowerPlant();
-
-    Optional<RequestError> removePowerPlant(PowerPlantNumber ppn, List<Resource> newResources);
+    boolean canStoreResources(List<Resource> resources);
 
     int numberOfConnectableCities(List<Resource> resources);
 
-    boolean canStoreResources(List<Resource> resources);
+    Variant<Integer, RequestError> usePowerPlant(
+            List<PowerPlantNumber> powerPlantNumbers,
+            List<Resource> resourcesToBurn);
 
-    Variant<Integer, RequestError> usePowerPlant(List<PowerPlantNumber> ppns, List<Resource> resourcesToBurn);
+    Optional<RequestError> removePowerPlant(
+            PowerPlantNumber powerPlantNumber,
+            List<Resource> remainingResources);
 }

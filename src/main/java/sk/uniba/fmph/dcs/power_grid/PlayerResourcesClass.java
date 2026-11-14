@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public final class PlayerResourcesClass implements PlayerResources {
 
-    private final List<Resource> resources;
+    private final Map<Resource, Integer> resourceCounts = new EnumMap<>(Resource.class);
     private final PlayerPowerPlants playerPowerPlants;
     private final ResourceMarket resourceMarket;
     private final ResourcePool resourcePool;
@@ -19,23 +19,17 @@ public final class PlayerResourcesClass implements PlayerResources {
             final PlayerPowerPlants playerPowerPlants,
             final ResourceMarket resourceMarket,
             final ResourcePool resourcePool) {
-        this(playerPowerPlants, resourceMarket, resourcePool, List.of());
-    }
-
-    public PlayerResourcesClass(
-            final PlayerPowerPlants playerPowerPlants,
-            final ResourceMarket resourceMarket,
-            final ResourcePool resourcePool,
-            final List<Resource> startingResources) {
         this.playerPowerPlants = Objects.requireNonNull(playerPowerPlants, "PlayerPowerPlants cannot be null");
         this.resourceMarket = Objects.requireNonNull(resourceMarket, "ResourceMarket cannot be null");
         this.resourcePool = Objects.requireNonNull(resourcePool, "ResourcePool cannot be null");
-        Objects.requireNonNull(startingResources, "Starting resources cannot be null");
-        this.resources = new ArrayList<>(startingResources);
+
+        for (Resource resourceType : Resource.values()) {
+            this.resourceCounts.put(resourceType, 0);
+        }
     }
 
     public List<Resource> getResources() {
-        return Collections.unmodifiableList(resources);
+        return Collections.unmodifiableList(toResourceList(this.resourceCounts));
     }
 
     @Override
@@ -45,96 +39,118 @@ public final class PlayerResourcesClass implements PlayerResources {
             return Optional.empty();
         }
 
-        List<Resource> combined = new ArrayList<>(this.resources);
-        combined.addAll(resourcesToBuy);
+        Map<Resource, Integer> toBuyCounts = countOccurrences(resourcesToBuy);
+        Map<Resource, Integer> projectedCounts = new EnumMap<>(this.resourceCounts);
+        for (Map.Entry<Resource, Integer> entry : toBuyCounts.entrySet()) {
+            projectedCounts.merge(entry.getKey(), entry.getValue(), Integer::sum);
+        }
 
-        if (!playerPowerPlants.canStoreResources(combined)) {
+        List<Resource> projectedResourcesList = toResourceList(projectedCounts);
+        if (!playerPowerPlants.canStoreResources(projectedResourcesList)) {
             return Optional.of(new RequestError("Player power plants cannot store the requested resources."));
         }
 
         resourceMarket.takeResources(resourcesToBuy);
-        this.resources.addAll(resourcesToBuy);
+        for (Map.Entry<Resource, Integer> entry : toBuyCounts.entrySet()) {
+            this.resourceCounts.merge(entry.getKey(), entry.getValue(), Integer::sum);
+        }
         return Optional.empty();
     }
 
     @Override
     public Variant<Integer, RequestError> usePowerPlant(
-            final List<PowerPlantNumber> ppns,
+            final List<PowerPlantNumber> powerPlantNumbers,
             final List<Resource> resourcesToBurn) {
-        Objects.requireNonNull(ppns, "Power plant numbers cannot be null");
+        Objects.requireNonNull(powerPlantNumbers, "Power plant numbers cannot be null");
         Objects.requireNonNull(resourcesToBurn, "Resources to burn cannot be null");
 
-        if (!hasResources(this.resources, resourcesToBurn)) {
+        Map<Resource, Integer> burnCounts = countOccurrences(resourcesToBurn);
+        if (!hasSufficientResources(burnCounts)) {
             return Variant.ofB(new RequestError("Player does not possess the resources required to burn."));
         }
 
-        Variant<Integer, RequestError> result = playerPowerPlants.usePowerPlant(ppns, resourcesToBurn);
-        if (result.isB()) {
-            return result;
+        Variant<Integer, RequestError> productionResult =
+                playerPowerPlants.usePowerPlant(powerPlantNumbers, resourcesToBurn);
+        if (productionResult.isB()) {
+            return productionResult;
         }
 
-        removeResources(this.resources, resourcesToBurn);
+        deductResources(burnCounts);
         resourcePool.putResources(resourcesToBurn);
-        return result;
+        return productionResult;
     }
 
     @Override
     public Optional<RequestError> removePowerPlant(
-            final PowerPlantNumber ppn,
-            final List<Resource> removedResources) {
-        Objects.requireNonNull(ppn, "Power plant number cannot be null");
-        Objects.requireNonNull(removedResources, "Removed resources list cannot be null");
+            final PowerPlantNumber powerPlantNumber,
+            final List<Resource> resourcesToRemove) {
+        Objects.requireNonNull(powerPlantNumber, "Power plant number cannot be null");
+        Objects.requireNonNull(resourcesToRemove, "Resources to remove list cannot be null");
 
-        if (!hasResources(this.resources, removedResources)) {
+        Map<Resource, Integer> removalCounts = countOccurrences(resourcesToRemove);
+        if (!hasSufficientResources(removalCounts)) {
             return Optional.of(new RequestError("Player does not possess the resources specified for removal."));
         }
 
-        List<Resource> remainingResources = subtractResources(this.resources, removedResources);
-        Optional<RequestError> error = playerPowerPlants.removePowerPlant(ppn, remainingResources);
-        if (error.isPresent()) {
-            return error;
+        Map<Resource, Integer> remainingCounts = new EnumMap<>(this.resourceCounts);
+        for (Map.Entry<Resource, Integer> entry : removalCounts.entrySet()) {
+            remainingCounts.merge(entry.getKey(), -entry.getValue(), Integer::sum);
         }
 
-        removeResources(this.resources, removedResources);
-        resourcePool.putResources(removedResources);
+        List<Resource> remainingResourcesList = toResourceList(remainingCounts);
+        Optional<RequestError> removalError =
+                playerPowerPlants.removePowerPlant(powerPlantNumber, remainingResourcesList);
+        if (removalError.isPresent()) {
+            return removalError;
+        }
+
+        deductResources(removalCounts);
+        resourcePool.putResources(resourcesToRemove);
         return Optional.empty();
     }
 
     @Override
     public int numberOfConnectableCities() {
-        return playerPowerPlants.numberOfConnectableCities(Collections.unmodifiableList(this.resources));
+        return playerPowerPlants.numberOfConnectableCities(getResources());
     }
 
-    private static Map<Resource, Integer> count(final List<Resource> list) {
-        Map<Resource, Integer> counts = new EnumMap<>(Resource.class);
-        for (Resource resource : list) {
-            counts.merge(resource, 1, Integer::sum);
-        }
-        return counts;
-    }
-
-    private static boolean hasResources(final List<Resource> available, final List<Resource> required) {
-        Map<Resource, Integer> availableCounts = count(available);
-        Map<Resource, Integer> requiredCounts = count(required);
-        for (Map.Entry<Resource, Integer> entry : requiredCounts.entrySet()) {
-            if (availableCounts.getOrDefault(entry.getKey(), 0) < entry.getValue()) {
+    private boolean hasSufficientResources(final Map<Resource, Integer> requiredResourceCounts) {
+        for (Map.Entry<Resource, Integer> entry : requiredResourceCounts.entrySet()) {
+            Resource resourceType = entry.getKey();
+            int requiredQuantity = entry.getValue();
+            int availableQuantity = this.resourceCounts.getOrDefault(resourceType, 0);
+            if (availableQuantity < requiredQuantity) {
                 return false;
             }
         }
         return true;
     }
 
-    private static void removeResources(final List<Resource> source, final List<Resource> toRemove) {
-        for (Resource r : toRemove) {
-            source.remove(r);
+    private void deductResources(final Map<Resource, Integer> resourcesToDeduct) {
+        for (Map.Entry<Resource, Integer> entry : resourcesToDeduct.entrySet()) {
+            Resource resourceType = entry.getKey();
+            int quantityToDeduct = entry.getValue();
+            this.resourceCounts.merge(resourceType, -quantityToDeduct, Integer::sum);
+            assert this.resourceCounts.get(resourceType) >= 0;
         }
     }
 
-    private static List<Resource> subtractResources(final List<Resource> source, final List<Resource> toSubtract) {
-        List<Resource> copy = new ArrayList<>(source);
-        for (Resource r : toSubtract) {
-            copy.remove(r);
+    private static Map<Resource, Integer> countOccurrences(final List<Resource> resourceList) {
+        Map<Resource, Integer> countsMap = new EnumMap<>(Resource.class);
+        for (Resource resourceType : resourceList) {
+            countsMap.merge(resourceType, 1, Integer::sum);
         }
-        return copy;
+        return countsMap;
+    }
+
+    private static List<Resource> toResourceList(final Map<Resource, Integer> countsMap) {
+        List<Resource> resourceList = new ArrayList<>();
+        for (Resource resourceType : Resource.values()) {
+            int quantity = countsMap.getOrDefault(resourceType, 0);
+            for (int index = 0; index < quantity; index++) {
+                resourceList.add(resourceType);
+            }
+        }
+        return resourceList;
     }
 }
