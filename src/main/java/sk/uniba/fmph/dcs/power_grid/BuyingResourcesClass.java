@@ -26,6 +26,12 @@ public final class BuyingResourcesClass implements BuyingResources {
         this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "PlayerBoardFacades cannot be null");
     }
 
+    public BuyingResourcesClass(
+            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades) {
+        this.resourceMarket = null;
+        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "PlayerBoardFacades cannot be null");
+    }
+
     @Override
     public void startPhase(final List<PlayerColor> playerOrder) {
         Objects.requireNonNull(playerOrder, "Player order cannot be null");
@@ -61,21 +67,28 @@ public final class BuyingResourcesClass implements BuyingResources {
         }
 
         if (!resourcesToBuy.isEmpty()) {
-            Integer totalCost = this.resourceMarket.getPrice(resourcesToBuy);
-            if (totalCost == null) {
-                return Variant.ofB(new RequestError("The requested resources are not available in the market."));
-            }
+            if (this.resourceMarket != null) {
+                Integer totalCost = this.resourceMarket.getPrice(resourcesToBuy);
+                if (totalCost == null) {
+                    return Variant.ofB(new RequestError("The requested resources are not available in the market."));
+                }
 
-            if (!playerBoard.hasEnoughMoney(totalCost)) {
-                return Variant.ofB(new RequestError("Player " + playerColor + " does not have enough money."));
-            }
+                if (!playerBoard.hasEnoughMoney(totalCost)) {
+                    return Variant.ofB(new RequestError("Player " + playerColor + " does not have enough money."));
+                }
 
-            Optional<RequestError> storageError = playerBoard.buyResources(resourcesToBuy);
-            if (storageError.isPresent()) {
-                return Variant.ofB(storageError.get());
-            }
+                Optional<RequestError> storageError = playerBoard.buyResources(resourcesToBuy);
+                if (storageError.isPresent()) {
+                    return Variant.ofB(storageError.get());
+                }
 
-            playerBoard.spendMoney(totalCost);
+                playerBoard.spendMoney(totalCost);
+            } else {
+                Optional<RequestError> purchaseError = playerBoard.buyResources(resourcesToBuy);
+                if (purchaseError.isPresent()) {
+                    return Variant.ofB(purchaseError.get());
+                }
+            }
         }
 
         this.currentPlayerIndex++;

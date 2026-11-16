@@ -219,4 +219,17 @@ public class BuyingResourcesTest {
     public void testNullPlayerBoardFacadesThrows() {
         new BuyingResourcesClass(resourceMarket, null);
     }
+
+    @Test
+    public void testConstructorWithoutResourceMarketDelegatesDirectlyToPlayerBoard() {
+        BuyingResources directBuying = new BuyingResourcesClass(playerBoardFacades);
+        directBuying.startPhase(List.of(PlayerColor.RED, PlayerColor.YELLOW));
+
+        Variant<PhaseStatus, RequestError> result =
+                directBuying.buyResources(PlayerColor.YELLOW, List.of(Resource.COAL));
+
+        assertTrue(result.isA());
+        assertEquals(PhaseStatus.PHASE_CONTINUES, result.getA());
+        assertEquals(List.of(Resource.COAL), yellowBoard.boughtResourcesList);
+    }
 }
