@@ -5,3 +5,8 @@ target
 .idea/
 *.iml
 .DS_Store
+
+# Local assignment reference files
+pts26.png
+Power-Grid-Recharged-Rules.pdf
+Assignment Power Grid.md
