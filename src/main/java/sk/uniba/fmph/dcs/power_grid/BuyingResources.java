@@ -6,7 +6,9 @@ public interface BuyingResources {
 
     void startPhase(List<PlayerColor> playerOrder);
 
-    Variant<PhaseStatus, RequestError> buyResources(PlayerColor player, List<Resource> removedResources);
+    Variant<PhaseStatus, RequestError> buyResources(
+            PlayerColor playerColor,
+            List<Resource> resourcesToBuy);
 
     String getState();
 }

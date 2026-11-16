@@ -43,6 +43,10 @@ final class FakePowerPlantMarket implements PowerPlantMarket {
     public void startStep3() {
         step3NotificationCount++;
     }
+
+    @Override
+    public void prepareNextTurn() {
+    }
 }
 
 final class StubResourcePoolForMarket implements InterfaceResourcePoolResourceMarket {
