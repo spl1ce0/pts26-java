@@ -10,7 +10,7 @@ import java.util.Objects;
  * Handles calculating the turn order of players for game rounds and determining
  * the final game rankings at the end of the game according to Power Grid rules.
  */
-public final class DeterminePlayerOrder {
+public final class DeterminePlayerOrder implements InterfaceDeterminePlayerOrder {
 
     private final List<PlayerColor> players;
     private final InterfaceTownsDeterminePlayerOrder towns;
