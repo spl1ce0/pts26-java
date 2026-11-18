@@ -11,17 +11,17 @@ import java.util.Optional;
 public final class PlayerResourcesClass implements PlayerResources {
 
     private final Map<Resource, Integer> resourceCounts = new EnumMap<>(Resource.class);
-    private final PlayerPowerPlants playerPowerPlants;
+    private final InterfacePlayerPowerPlants playerPowerPlants;
     private final ResourceMarket resourceMarket;
-    private final ResourcePool resourcePool;
+    private final InterfaceResourcePool resourcePool;
 
     public PlayerResourcesClass(
-            final PlayerPowerPlants playerPowerPlants,
+            final InterfacePlayerPowerPlants playerPowerPlants,
             final ResourceMarket resourceMarket,
-            final ResourcePool resourcePool) {
-        this.playerPowerPlants = Objects.requireNonNull(playerPowerPlants, "PlayerPowerPlants cannot be null");
+            final InterfaceResourcePool resourcePool) {
+        this.playerPowerPlants = Objects.requireNonNull(playerPowerPlants, "InterfacePlayerPowerPlants cannot be null");
         this.resourceMarket = Objects.requireNonNull(resourceMarket, "ResourceMarket cannot be null");
-        this.resourcePool = Objects.requireNonNull(resourcePool, "ResourcePool cannot be null");
+        this.resourcePool = Objects.requireNonNull(resourcePool, "InterfaceResourcePool cannot be null");
 
         for (Resource resourceType : Resource.values()) {
             this.resourceCounts.put(resourceType, 0);

@@ -21,7 +21,7 @@ public class BureaucracyTest {
     private StubPlayerBoardFacade redPlayerBoard;
     private StubPlayerBoardFacade bluePlayerBoard;
     private StubPlayerBoardFacade greenPlayerBoard;
-    private Map<PlayerColor, PlayerBoardFacade> playerBoardFacades;
+    private Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades;
 
     private StubCheckAndBumpStep checkAndBumpStep;
     private StubPoolForBureaucracy stubPool;
@@ -338,7 +338,7 @@ public class BureaucracyTest {
     }
 }
 
-final class StubPlayerBoardFacade implements PlayerBoardFacade {
+final class StubPlayerBoardFacade implements InterfacePlayerBoardFacade {
     private RequestError usePowerPlantsError = null;
 
     void setUsePowerPlantsError(final RequestError error) {

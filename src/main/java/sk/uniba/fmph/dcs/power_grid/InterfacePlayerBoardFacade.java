@@ -3,7 +3,7 @@ package sk.uniba.fmph.dcs.power_grid;
 import java.util.List;
 import java.util.Optional;
 
-public interface PlayerBoardFacade {
+public interface InterfacePlayerBoardFacade {
 
     boolean hasEnoughMoney(int amount);
 

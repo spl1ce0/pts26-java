@@ -13,7 +13,7 @@ import java.util.Optional;
 public final class BuyingResourcesClass implements BuyingResources {
 
     private final ResourceMarket resourceMarket;
-    private final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades;
+    private final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades;
 
     private List<PlayerColor> reversePlayerOrder = new ArrayList<>();
     private int currentPlayerIndex = 0;
@@ -21,15 +21,15 @@ public final class BuyingResourcesClass implements BuyingResources {
 
     public BuyingResourcesClass(
             final ResourceMarket resourceMarket,
-            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades) {
+            final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades) {
         this.resourceMarket = Objects.requireNonNull(resourceMarket, "ResourceMarket cannot be null");
-        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "PlayerBoardFacades cannot be null");
+        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "InterfacePlayerBoardFacades cannot be null");
     }
 
     public BuyingResourcesClass(
-            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades) {
+            final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades) {
         this.resourceMarket = null;
-        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "PlayerBoardFacades cannot be null");
+        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "InterfacePlayerBoardFacades cannot be null");
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class BuyingResourcesClass implements BuyingResources {
             return Variant.ofB(new RequestError("It is not player " + playerColor + "'s turn to buy resources."));
         }
 
-        PlayerBoardFacade playerBoard = this.playerBoardFacades.get(playerColor);
+        InterfacePlayerBoardFacade playerBoard = this.playerBoardFacades.get(playerColor);
         if (playerBoard == null) {
             return Variant.ofB(new RequestError("No player board found for player " + playerColor + "."));
         }

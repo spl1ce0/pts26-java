@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-final class FakePlayerPowerPlants implements PlayerPowerPlants {
+final class FakePlayerPowerPlants implements InterfacePlayerPowerPlants {
     boolean canStore = true;
     int connectableCities = 0;
     Variant<Integer, RequestError> usePowerPlantResult = Variant.ofA(2);
@@ -54,7 +54,7 @@ final class FakePlayerPowerPlants implements PlayerPowerPlants {
     }
 }
 
-final class FakeResourcePool implements ResourcePool {
+final class FakeResourcePool implements InterfaceResourcePool {
     List<Resource> depositedResources = new ArrayList<>();
 
     @Override

@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-final class FakePlayerBoardFacade implements PlayerBoardFacade {
+final class FakePlayerBoardFacade implements InterfacePlayerBoardFacade {
     int money = 50;
     int spentMoneyTotal = 0;
     boolean canStoreResources = true;
@@ -58,7 +58,7 @@ final class FakePlayerBoardFacade implements PlayerBoardFacade {
 public class BuyingResourcesTest {
 
     private ResourceMarket resourceMarket;
-    private Map<PlayerColor, PlayerBoardFacade> playerBoardFacades;
+    private Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades;
     private FakePlayerBoardFacade redBoard;
     private FakePlayerBoardFacade blueBoard;
     private FakePlayerBoardFacade yellowBoard;

@@ -14,7 +14,7 @@ public final class BureaucracyClass implements Bureaucracy {
 
     public static final int DEFAULT_GAME_END_HOUSE_THRESHOLD = 17;
 
-    private final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades;
+    private final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades;
     private final CheckAndBumpStep checkAndBumpStep;
     private final ResourceMarket resourceMarket;
     private final PowerPlantMarket powerPlantMarket;
@@ -26,13 +26,13 @@ public final class BureaucracyClass implements Bureaucracy {
     private boolean isPhaseActive = false;
 
     public BureaucracyClass(
-            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades,
+            final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades,
             final CheckAndBumpStep checkAndBumpStep,
             final ResourceMarket resourceMarket,
             final PowerPlantMarket powerPlantMarket,
             final Towns towns,
             final int gameEndHouseThreshold) {
-        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "PlayerBoardFacades cannot be null");
+        this.playerBoardFacades = Objects.requireNonNull(playerBoardFacades, "InterfacePlayerBoardFacades cannot be null");
         this.checkAndBumpStep = Objects.requireNonNull(checkAndBumpStep, "CheckAndBumpStep cannot be null");
         this.resourceMarket = Objects.requireNonNull(resourceMarket, "ResourceMarket cannot be null");
         this.powerPlantMarket = Objects.requireNonNull(powerPlantMarket, "PowerPlantMarket cannot be null");
@@ -44,7 +44,7 @@ public final class BureaucracyClass implements Bureaucracy {
     }
 
     public BureaucracyClass(
-            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades,
+            final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades,
             final CheckAndBumpStep checkAndBumpStep,
             final ResourceMarket resourceMarket,
             final PowerPlantMarket powerPlantMarket,
@@ -53,7 +53,7 @@ public final class BureaucracyClass implements Bureaucracy {
     }
 
     public BureaucracyClass(
-            final Map<PlayerColor, PlayerBoardFacade> playerBoardFacades,
+            final Map<PlayerColor, InterfacePlayerBoardFacade> playerBoardFacades,
             final CheckAndBumpStep checkAndBumpStep,
             final ResourceMarket resourceMarket,
             final PowerPlantMarket powerPlantMarket) {
@@ -90,7 +90,7 @@ public final class BureaucracyClass implements Bureaucracy {
             return Variant.ofB(new RequestError("It is not player " + playerColor + "'s turn."));
         }
 
-        PlayerBoardFacade playerBoardFacade = this.playerBoardFacades.get(playerColor);
+        InterfacePlayerBoardFacade playerBoardFacade = this.playerBoardFacades.get(playerColor);
         if (playerBoardFacade == null) {
             return Variant.ofB(new RequestError("No player board found for player " + playerColor + "."));
         }
