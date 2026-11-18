@@ -7,12 +7,16 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests for PowerPlantNumber.
+ */
 public class PowerPlantNumberTest {
 
     @Test
     public void testValueAndToString() {
         PowerPlantNumber pp = new PowerPlantNumber(13);
         assertEquals(13, pp.getValue());
+        assertEquals(13, pp.getNumber());
         assertEquals("13", pp.toString());
     }
 
