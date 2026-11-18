@@ -3,10 +3,14 @@ package sk.uniba.fmph.dcs.power_grid;
 import java.util.Collections;
 import java.util.List;
 
-public class UsePowerPlantsClass implements UsePowerPlants {
+/**
+ * Implementation of UsePowerPlants validating fuel burning and calculating supplied towns.
+ */
+public final class UsePowerPlantsClass implements UsePowerPlants {
 
     @Override
-    public Variant<RequestError, Integer> numberOfSuppliableTowns(List<Resource> resources, List<PowerPlant> powerplants) {
+    public Variant<RequestError, Integer> numberOfSuppliableTowns(
+            final List<Resource> resources, final List<PowerPlant> powerplants) {
         if (resources == null || powerplants == null) {
             throw new IllegalArgumentException("Lists cannot be null.");
         }
@@ -32,7 +36,7 @@ public class UsePowerPlantsClass implements UsePowerPlants {
         return Variant.ofB(totalCities);
     }
 
-    private int calculateTotalRequiredResources(List<PowerPlant> powerplants) {
+    private int calculateTotalRequiredResources(final List<PowerPlant> powerplants) {
         int total = 0;
         for (PowerPlant plant : powerplants) {
             total += plant.resourceAmount();
@@ -40,7 +44,7 @@ public class UsePowerPlantsClass implements UsePowerPlants {
         return total;
     }
 
-    private int calculateTotalCities(List<PowerPlant> powerplants) {
+    private int calculateTotalCities(final List<PowerPlant> powerplants) {
         int total = 0;
         for (PowerPlant plant : powerplants) {
             total += plant.numberOfCities();
@@ -48,7 +52,7 @@ public class UsePowerPlantsClass implements UsePowerPlants {
         return total;
     }
 
-    private boolean matchesRequirements(List<Resource> resources, List<PowerPlant> powerplants) {
+    private boolean matchesRequirements(final List<Resource> resources, final List<PowerPlant> powerplants) {
         int coal = Collections.frequency(resources, Resource.COAL);
         int oil = Collections.frequency(resources, Resource.OIL);
         int garbage = Collections.frequency(resources, Resource.GARBAGE);
@@ -59,7 +63,7 @@ public class UsePowerPlantsClass implements UsePowerPlants {
                 && checkCoalAndOilRequirements(coal, oil, powerplants);
     }
 
-    private boolean checkExclusiveRequirement(Resource resource, int count, List<PowerPlant> powerplants) {
+    private boolean checkExclusiveRequirement(final Resource resource, final int count, final List<PowerPlant> powerplants) {
         int needed = 0;
         for (PowerPlant plant : powerplants) {
             if (plant.acceptsResource(resource)) {
@@ -69,7 +73,7 @@ public class UsePowerPlantsClass implements UsePowerPlants {
         return count == needed;
     }
 
-    private boolean checkCoalAndOilRequirements(int coalCount, int oilCount, List<PowerPlant> powerplants) {
+    private boolean checkCoalAndOilRequirements(final int coalCount, final int oilCount, final List<PowerPlant> powerplants) {
         int coalOnlyNeeded = 0;
         int oilOnlyNeeded = 0;
 

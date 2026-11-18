@@ -3,6 +3,12 @@ package sk.uniba.fmph.dcs.power_grid;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * Generic container holding either value A or value B.
+ *
+ * @param <A> type of first option
+ * @param <B> type of second option
+ */
 public final class Variant<A, B> {
 
     private final A a;

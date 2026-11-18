@@ -3,12 +3,15 @@ package sk.uniba.fmph.dcs.power_grid;
 import java.util.Collections;
 import java.util.List;
 
-public class StoreResourcesClass implements StoreResources {
+/**
+ * Implementation of StoreResources checking if resources fit in power plants.
+ */
+public final class StoreResourcesClass implements StoreResources {
 
     @Override
-    public boolean canStoreResources(List<Resource> resources, List<PowerPlant> powerplants) {
+    public boolean canStoreResources(final List<Resource> resources, final List<PowerPlant> powerplants) {
         if (resources == null || powerplants == null) {
-            throw new IllegalArgumentException("As listas não podem ser null.");
+            throw new IllegalArgumentException("Lists cannot be null.");
         }
         if (resources.isEmpty()) {
             return true;
@@ -27,7 +30,7 @@ public class StoreResourcesClass implements StoreResources {
                 && canStoreCoalAndOil(coal, oil, powerplants);
     }
 
-    private boolean canStoreExclusive(Resource resource, int count, List<PowerPlant> powerplants) {
+    private boolean canStoreExclusive(final Resource resource, final int count, final List<PowerPlant> powerplants) {
         int capacity = 0;
         for (PowerPlant plant : powerplants) {
             if (plant.acceptsResource(resource)) {
@@ -37,7 +40,7 @@ public class StoreResourcesClass implements StoreResources {
         return count <= capacity;
     }
 
-    private boolean canStoreCoalAndOil(int coalCount, int oilCount, List<PowerPlant> powerplants) {
+    private boolean canStoreCoalAndOil(final int coalCount, final int oilCount, final List<PowerPlant> powerplants) {
         int coalOnlyCapacity = 0;
         int oilOnlyCapacity = 0;
         int hybridCapacity = 0;

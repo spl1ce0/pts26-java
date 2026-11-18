@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsablePowerPlants {
+/**
+ * Implementation of MaximumNumberOfUsablePowerPlants finding optimal power plant activation.
+ */
+public final class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsablePowerPlants {
 
     @Override
-    public int numberOfSuppliableTowns(List<Resource> resources, List<PowerPlant> powerplants) {
+    public int numberOfSuppliableTowns(final List<Resource> resources, final List<PowerPlant> powerplants) {
         if (resources == null || powerplants == null) {
             throw new IllegalArgumentException("Lists cannot be null.");
         }
@@ -37,7 +40,12 @@ public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsa
         return maxCities;
     }
 
-    private List<List<PowerPlant>> getAllSubsets(List<PowerPlant> powerplants) {
+    @Override
+    public int numberOfSuppliebleTowns(final List<Resource> resources, final List<PowerPlant> powerplants) {
+        return numberOfSuppliableTowns(resources, powerplants);
+    }
+
+    private List<List<PowerPlant>> getAllSubsets(final List<PowerPlant> powerplants) {
         List<List<PowerPlant>> subsets = new ArrayList<>();
         int n = powerplants.size();
         int totalCombinations = 1 << n;
@@ -54,7 +62,7 @@ public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsa
         return subsets;
     }
 
-    private int calculateTotalCities(List<PowerPlant> powerplants) {
+    private int calculateTotalCities(final List<PowerPlant> powerplants) {
         int total = 0;
         for (PowerPlant plant : powerplants) {
             total += plant.numberOfCities();
@@ -62,13 +70,14 @@ public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsa
         return total;
     }
 
-    private boolean canSupplySubset(List<PowerPlant> subset, int coal, int oil, int garbage, int uranium) {
+    private boolean canSupplySubset(final List<PowerPlant> subset, final int coal, final int oil,
+                                    final int garbage, final int uranium) {
         return checkExclusive(Resource.GARBAGE, garbage, subset)
                 && checkExclusive(Resource.URANIUM, uranium, subset)
                 && checkCoalAndOil(coal, oil, subset);
     }
 
-    private boolean checkExclusive(Resource resource, int availableCount, List<PowerPlant> subset) {
+    private boolean checkExclusive(final Resource resource, final int availableCount, final List<PowerPlant> subset) {
         int needed = 0;
         for (PowerPlant plant : subset) {
             if (plant.acceptsResource(resource)) {
@@ -78,7 +87,7 @@ public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsa
         return availableCount >= needed;
     }
 
-    private boolean checkCoalAndOil(int availableCoal, int availableOil, List<PowerPlant> subset) {
+    private boolean checkCoalAndOil(final int availableCoal, final int availableOil, final List<PowerPlant> subset) {
         int coalOnlyNeeded = 0;
         int oilOnlyNeeded = 0;
         int hybridNeeded = 0;
@@ -104,6 +113,4 @@ public class MaximumNumberOfUsablePowerPlantsClass implements MaximumNumberOfUsa
 
         return (remainingCoal + remainingOil) >= hybridNeeded;
     }
-
-
 }
