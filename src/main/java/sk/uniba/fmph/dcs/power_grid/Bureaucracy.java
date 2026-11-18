@@ -2,7 +2,7 @@ package sk.uniba.fmph.dcs.power_grid;
 
 import java.util.List;
 
-public interface Bureaucracy {
+public interface Bureaucracy extends InterfaceBureaucracy {
 
     void startPhase(List<PlayerColor> playerOrder);
 

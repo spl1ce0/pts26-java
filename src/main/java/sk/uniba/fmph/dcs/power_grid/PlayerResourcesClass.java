@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class PlayerResourcesClass implements PlayerResources {
+public final class PlayerResourcesClass implements PlayerResources, InterfacePlayerResources {
 
     private final Map<Resource, Integer> resourceCounts = new EnumMap<>(Resource.class);
     private final InterfacePlayerPowerPlants playerPowerPlants;
@@ -78,6 +78,18 @@ public final class PlayerResourcesClass implements PlayerResources {
         deductResources(burnCounts);
         resourcePool.putResources(resourcesToBurn);
         return productionResult;
+    }
+
+    @Override
+    public Optional<RequestError> usePowerPlants(
+            final PlayerColor playerColor,
+            final List<PowerPlantNumber> powerPlantNumbers,
+            final List<Resource> resourcesToBurn) {
+        Variant<Integer, RequestError> result = usePowerPlant(powerPlantNumbers, resourcesToBurn);
+        if (result.isB()) {
+            return Optional.of(result.getB());
+        }
+        return Optional.empty();
     }
 
     @Override

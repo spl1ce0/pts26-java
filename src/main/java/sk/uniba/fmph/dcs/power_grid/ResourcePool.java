@@ -11,7 +11,7 @@ import java.util.Objects;
  * market.
  * Total tokens in the game: COAL=24, OIL=24, GARBAGE=24, URANIUM=12.
  */
-public final class ResourcePool implements InterfaceResourcePoolResourceMarket, InterfaceResourcePoolPlayerResources {
+public final class ResourcePool implements InterfaceResourcePoolResourceMarket, InterfaceResourcePoolPlayerResources, InterfaceResourcePool {
     private final Map<Resource, Integer> stock = new EnumMap<>(Resource.class);
 
     public ResourcePool(final List<Resource> initialResources) {
