@@ -2,6 +2,13 @@ package sk.uniba.fmph.dcs.power_grid;
 
 import java.util.Objects;
 
+/**
+ * Generic tagged union / either container holding either a value of type
+ * {@code FirstType} (A) or of type {@code SecondType} (B).
+ *
+ * @param <FirstType>  the type of the first value (A)
+ * @param <SecondType> the type of the second value (B)
+ */
 public final class Variant<FirstType, SecondType> {
 
     private final FirstType firstValue;

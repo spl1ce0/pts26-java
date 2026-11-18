@@ -2,6 +2,9 @@ package sk.uniba.fmph.dcs.power_grid;
 
 import java.util.Objects;
 
+/**
+ * Unique identifier / value representation for a Power Plant.
+ */
 public final class PowerPlantNumber implements Comparable<PowerPlantNumber> {
 
     private final int value;
@@ -22,7 +25,6 @@ public final class PowerPlantNumber implements Comparable<PowerPlantNumber> {
     public int getNumber() {
         return value;
     }
-
 
     @Override
     public int compareTo(final PowerPlantNumber otherPowerPlantNumber) {
