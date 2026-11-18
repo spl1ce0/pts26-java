@@ -1,2 +1,5 @@
 target
 .Makefile.swp
+.DS_Store
+.idea/
+*.iml
