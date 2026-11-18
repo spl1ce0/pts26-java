@@ -14,6 +14,16 @@ public final class PowerPlantNumber implements Comparable<PowerPlantNumber> {
         return value;
     }
 
+    /**
+     * Returns the integer power plant number (alias for getValue).
+     *
+     * @return the power plant number
+     */
+    public int getNumber() {
+        return value;
+    }
+
+
     @Override
     public int compareTo(final PowerPlantNumber otherPowerPlantNumber) {
         Objects.requireNonNull(otherPowerPlantNumber, "PowerPlantNumber to compare cannot be null");

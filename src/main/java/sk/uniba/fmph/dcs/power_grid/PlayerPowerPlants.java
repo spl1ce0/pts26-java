@@ -22,6 +22,8 @@ public final class PlayerPowerPlants {
     /**
      * Returns the {@link PowerPlantNumber} of the highest-numbered owned power plant,
      * or {@code null} if the player owns no power plants.
+     *
+     * @return highest-numbered owned power plant, or null
      */
     public PowerPlantNumber bestPowerPlant() {
         if (powerPlants.isEmpty()) {
